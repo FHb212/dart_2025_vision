@@ -1,0 +1,5 @@
+dart_detector_node:
+  ros__parameters:
+    hsv_inrange_thresh_lo: [30, 150, 150]
+    hsv_inrange_thresh_hi: [100, 255, 255]
+    gaussian_blur_radius: 5.0
