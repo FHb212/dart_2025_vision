@@ -1,5 +1,4 @@
 #include "usbcdc_transporter.hpp"
-
 namespace transporter_sdk {
 
 bool UsbcdcTransporter::open() {

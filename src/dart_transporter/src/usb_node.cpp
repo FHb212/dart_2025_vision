@@ -1,7 +1,7 @@
 // Transporter node: subscribe aim_info and send via USB CDC
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/float32_multi_array.hpp>
-
+#include <iostream>
 #include "usb.hpp"
 
 using transporter_sdk::UsbcdcTransporter;
@@ -10,8 +10,8 @@ class UsbNode : public rclcpp::Node {
  public:
 	UsbNode() : rclcpp::Node("usb_node") {
 		// Parameters for device configuration
-		vid_ = this->declare_parameter<int>("vid", 0);
-		pid_ = this->declare_parameter<int>("pid", 0);
+		vid_ = this->declare_parameter<int>("vid", 0x0483);
+		pid_ = this->declare_parameter<int>("pid", 0x5740);
 		read_ep_ = this->declare_parameter<int>("read_endpoint", 0x81);   // IN endpoint example
 		write_ep_ = this->declare_parameter<int>("write_endpoint", 0x01); // OUT endpoint example
 		read_timeout_ = this->declare_parameter<int>("read_timeout", 50);
@@ -34,13 +34,15 @@ class UsbNode : public rclcpp::Node {
 					if (msg.data.size() < 3) return;
 					transporter::SendPackage pkg{};
 					pkg._SOF = RMOS_SEND_ID;
-					pkg.ID = 0x1;
+					pkg.ID = RMOS_SEND_ID;
 					pkg.yaw = msg.data[0];
 					pkg.pitch = msg.data[1];
 					pkg.is_detectored = (msg.data[2] > 0.5f);
-					pkg._EOF = 0xEE;
+					pkg._EOF = 0xFF;
 
 					int ret = transporter_->write(reinterpret_cast<unsigned char *>(&pkg), sizeof(pkg));
+					std::cerr << "Sent yaw: " << pkg.yaw << " pitch: " << pkg.pitch
+							  << " detected: " << pkg.is_detectored << std::endl;
 					if (ret < 0) {
 						RCLCPP_WARN(this->get_logger(), "USB write failed: %d", ret);
 					}
