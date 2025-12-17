@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>rmos_transporter</name>
+  <name>dart_transporter</name>
   <version>0.0.0</version>
   <description>Communicate between miniPC and board.</description>
   <maintainer email="33cc77dd66@gmail.com">shanzoom</maintainer>

@@ -1,0 +1,14 @@
+usb_node:
+  ros__parameters:
+    # USB 设备 VID / PID（十进制）
+    vid: 1234          # TODO: 换成你的设备 VID
+    pid: 5678          # TODO: 换成你的设备 PID
+
+    # 端点（十进制）
+    # 0x81 = 129，一般是 IN 端点
+    read_endpoint: 129
+    write_endpoint: 1
+
+    # 超时时间（毫秒）
+    read_timeout: 50
+    write_timeout: 50
