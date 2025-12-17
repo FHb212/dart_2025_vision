@@ -4,6 +4,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/msg/image.hpp>
+#include <std_msgs/msg/float32_multi_array.hpp>
 
 #include <opencv2/opencv.hpp>
 
@@ -55,14 +56,35 @@ class DartDetectorNode : public rclcpp::Node {
                                                      .allow_undeclared_parameters(true)
                                                      .automatically_declare_parameters_from_overrides(true))
       : Node("dart_detector_node", options) {
+    fov_x_deg_ = this->declare_parameter("fov_x_deg", 60.0);
+    fov_y_deg_ = this->declare_parameter("fov_y_deg", 45.0);
     rpm_.Init();
     debug_image_pub_ = create_publisher<sensor_msgs::msg::Image>("debug_image", rclcpp::SensorDataQoS());
+    aim_pub_ = create_publisher<std_msgs::msg::Float32MultiArray>("aim_info", 10);
     image_sub_ = create_subscription<sensor_msgs::msg::Image>(
         "image_raw", rclcpp::SensorDataQoS(), [&](const sensor_msgs::msg::Image::SharedPtr msg) {
           const cv::Mat cv_image = RosImageIntoCvMat(msg);
           const auto result = ProcessFrame(cv_image);
           bridge_ = cv_bridge::CvImage(msg->header, result.debug_image_format, result.debug_image);
           debug_image_pub_->publish(*bridge_.toImageMsg());
+
+          // Publish yaw, pitch, and detected flag
+          std_msgs::msg::Float32MultiArray aim;
+          aim.data.resize(3, 0.0f);
+          const bool has_target = !result.detected_objects.empty();
+          aim.data[2] = has_target ? 1.0f : 0.0f;
+          if (has_target) {
+            const auto top = result.detected_objects.top();
+            const float w = static_cast<float>(msg->width);
+            const float h = static_cast<float>(msg->height);
+            const float dx = (static_cast<float>(top.mass_center.x) - w * 0.5f) / (w * 0.5f);
+            const float dy = (static_cast<float>(top.mass_center.y) - h * 0.5f) / (h * 0.5f);
+            const float yaw_deg = dx * static_cast<float>(fov_x_deg_);
+            const float pitch_deg = -dy * static_cast<float>(fov_y_deg_);
+            aim.data[0] = yaw_deg;
+            aim.data[1] = pitch_deg;
+          }
+          aim_pub_->publish(aim);
         });
     RCLCPP_INFO(get_logger(), "DartDetectorNode initialized");
   }
@@ -134,6 +156,9 @@ class DartDetectorNode : public rclcpp::Node {
   RosParamsManager<RosParams> rpm_{this};
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_{nullptr};
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr debug_image_pub_{nullptr};
+  rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr aim_pub_{nullptr};
+  double fov_x_deg_{60.0};
+  double fov_y_deg_{45.0};
 };
 
 int main(int argc, char **argv) {

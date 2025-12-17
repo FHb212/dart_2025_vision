@@ -8,6 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(backward_ros REQUIRED)
 find_package(ament_cmake_auto REQUIRED)
+find_package(std_msgs REQUIRED)
 ament_auto_find_build_dependencies()
 
 if(NOT CMAKE_BUILD_TYPE)
