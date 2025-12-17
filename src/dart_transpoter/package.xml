@@ -1,20 +1,18 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>dart_detector</name>
+  <name>rmos_transporter</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="1746605313@qq.com">nuc</maintainer>
+  <description>Communicate between miniPC and board.</description>
+  <maintainer email="33cc77dd66@gmail.com">shanzoom</maintainer>
   <license>TODO: License declaration</license>
 
-  <depend>backward_ros</depend>
-
-  <depend>cv_bridge</depend>
-  <depend>rclcpp</depend>
-  <depend>sensor_msgs</depend>
-  <depend>std_msgs</depend>
-  
   <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>tf2_ros</depend>
+  <depend>libusb-1.0</depend>
+  <depend>std_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
